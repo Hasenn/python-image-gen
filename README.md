@@ -1,1 +1,1 @@
-[Diff](diff.gif)
+![Diff](diff.gif)
