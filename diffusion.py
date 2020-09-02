@@ -14,7 +14,7 @@ class Automaton:
             [0.1,  0.1,  0.1 ],
             [0.05, 0.1,  0.05]]
         self.values = [
-            [1,  1,  1],
+            [1,  2,  1],
             [1,  0,  1 ],
             [1, 0,  1]]
         self.seeds = set()
@@ -55,7 +55,15 @@ class Simulation:
     def advance(self, n):
         for i in range(n):
             print(f"Computing step {i}")
-            self.grid = self.sim_step()            
+            self.grid = self.sim_step()
+    def animate(self,n):
+        images = []
+        for i in range(n):
+            images.append(self.render())
+            print(f"Computing step {i}")
+            self.grid = self.sim_step()
+        return images
+
 
     
     def render(self):
@@ -80,9 +88,7 @@ if __name__ == "__main__":
         if not ((k,l) in sim.automaton.seeds):
             sim.automaton.seeds.add((k,l))
 
-    sim.advance(args.steps)
-
-    img = sim.render()
+    images = sim.animate(args.steps)
     path = ntpath.abspath(__file__)
-    img.save(ntpath.dirname(path) + "/" + "diff6.png")
+    images[0].save(ntpath.dirname(path) + "/" + "diff.gif", save_all=True, append_images = images[1:], loop=0)
 
