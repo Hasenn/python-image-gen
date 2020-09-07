@@ -10,13 +10,13 @@ class Automaton:
     
     def __init__(self):
         self.probabilities = [
-            [0.1,  0.1, 0.1 ],
-            [0.1,  0.1,  0.1 ],
-            [0.2, 0.1,  0.2]]
+            [0.05,  0.01, 0.05 ],
+            [0.01,  0.0,  0.01 ],
+            [0.01, 0.01,  0.01]]
         self.values = [
             [1,  0,  1],
             [0,  0,  0 ],
-            [1, 0,  15]]
+            [1, 0,  1]]
         self.seeds = set()
         self.p_direct = 0.2
         self.seed_value = 1
@@ -27,9 +27,6 @@ class Automaton:
             if (k,l) in self.seeds:
                 s += int(random.random() < self.p_direct) * self.seed_value
         return clamp(s,0,255)
-
-
-        
 
 class Simulation:
     def __init__(self, size_x, size_y):
@@ -54,17 +51,15 @@ class Simulation:
     
     def advance(self, n):
         for i in range(n):
-            print(f"Computing step {i}")
             self.grid = self.sim_step()
+    
     def animate(self,n):
         images = []
         for i in range(n):
+            print(f'step {i+1} / {n}.')
             images.append(self.render())
-            print(f"Computing step {i}")
             self.grid = self.sim_step()
         return images
-
-
     
     def render(self):
         img = Image.new("L", (self.size_x, self.size_y))
@@ -73,22 +68,38 @@ class Simulation:
                 img.putpixel((i,j), self.grid[i][j])
         return img
 
-        
+    def export(self,path,steps):
+        for step in range(steps):
+            print(f'step {step + 1} / {steps}.')
+            self.advance()
+        print(f'rendering last step to {path}')
+        image = self.render()
+        image.save(f'{path}.png')
+
+    def export_gif(self,path,steps):
+        images = self.animate(steps)
+        images[0].save(f'{path}.gif',save_all=True,append_images = images[1:], loop = 0)
+
+
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+    parser.add_argument("name")
     parser.add_argument("steps", type=int)
     parser.add_argument("--seeds", type=int, default=100)
     args = parser.parse_args()
 
     random.seed()
 
-    sim = Simulation(100,100)
+    sim = Simulation(80,80)
 
     for i in range(args.seeds):
         k,l = random.randint(0,sim.size_x), random.randint(0,sim.size_y)
         if not ((k,l) in sim.automaton.seeds):
             sim.automaton.seeds.add((k,l))
 
-    images = sim.animate(args.steps)
-    path = ntpath.abspath(__file__)
-    images[0].save(ntpath.dirname(path) + "/" + "diff.gif", save_all=True, append_images = images[1:], loop=0)
+    path = ntpath.dirname(
+        ntpath.abspath(__file__)
+    )
+    sim.export_gif(f'{path}/{args.name}',args.steps)
