@@ -10,16 +10,16 @@ class Automaton:
     
     def __init__(self):
         self.probabilities = [
-            [0.1,  0.5, 0.1 ],
+            [0.1,  0.1, 0.1 ],
             [0.1,  0.1,  0.1 ],
-            [0.05, 0.1,  0.05]]
+            [0.2, 0.1,  0.2]]
         self.values = [
-            [1,  2,  1],
-            [1,  0,  1 ],
-            [1, 0,  1]]
+            [1,  0,  1],
+            [0,  0,  0 ],
+            [1, 0,  15]]
         self.seeds = set()
         self.p_direct = 0.2
-        self.seed_value = 5
+        self.seed_value = 1
     def cell_step(self, grid, i, j, neighbours):
         s = 0
         for (k,l) in neighbours:
@@ -77,13 +77,14 @@ class Simulation:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("steps", type=int)
+    parser.add_argument("--seeds", type=int, default=100)
     args = parser.parse_args()
 
     random.seed()
 
     sim = Simulation(100,100)
 
-    for i in range(200):
+    for i in range(args.seeds):
         k,l = random.randint(0,sim.size_x), random.randint(0,sim.size_y)
         if not ((k,l) in sim.automaton.seeds):
             sim.automaton.seeds.add((k,l))
@@ -91,4 +92,3 @@ if __name__ == "__main__":
     images = sim.animate(args.steps)
     path = ntpath.abspath(__file__)
     images[0].save(ntpath.dirname(path) + "/" + "diff.gif", save_all=True, append_images = images[1:], loop=0)
-
