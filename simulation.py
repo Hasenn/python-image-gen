@@ -1,8 +1,8 @@
-import argparse
 import random
-import ntpath
 from PIL import Image
 from copy import deepcopy
+import multiprocessing as mp
+
 
 def clamp(x, smallest, largest): return max(smallest, min(x, largest))
 
@@ -18,6 +18,7 @@ class Sim:
         self.size_y = size_y
         self.grid = [[0 for i in range(size_y)] for j in range(size_x)]
         self.automaton : Automaton = automaton
+        self._pool = mp.Pool()
 
     def get_moore_neighbourhood(self, i, j):
         return filter(
@@ -26,19 +27,35 @@ class Sim:
                 [(i + k, j+l) for k in [-1,0,1] for l in [-1,0,1]]
                 )
     
-    def sim_step(self):
+    def sim_step_serial(self):
         new_grid = deepcopy(self.grid)
         for i in range(self.size_x):
             for j in range(self.size_y):
                 new_grid[i][j] = clamp(
-                    new_grid[i][j] + self.automaton.cell_step(
+                    self.grid[i][j] + self.automaton.cell_step(
                         self.grid,
                         i, j,
                         self.get_moore_neighbourhood(i,j)),
                         0, 255
                         )
         return new_grid
-    
+    def sim_step(self):
+        return self.sim_step_serial()
+    def sim_step_parallel(self):
+        _pool.map(self._sim_cell, 
+            _pool.map(self._sim_cell,
+                [[(i,j) for i in range(self.size_x)] for j in range(self.size_y)]
+            )
+        )
+        return new_grid
+    def _sim_cell(self, i,j):
+        return clamp(
+                    self.grid[i][j] + self.automaton.cell_step(
+                        self.grid,
+                        i, j,
+                        self.get_moore_neighbourhood(i,j)),
+                        0, 255
+                    )
     def advance(self, n):
         for i in range(n):
             self.grid = self.sim_step()
@@ -61,7 +78,7 @@ class Sim:
     def export(self,path,steps):
         for step in range(steps):
             print(f'step {step + 1} / {steps}.', end='\r')
-            self.advance()
+            self.sim_step()
         print(f'rendering last step to {path}')
         image = self.render()
         image.save(f'{path}.png')

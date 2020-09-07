@@ -2,8 +2,6 @@ import argparse
 import random
 import ntpath
 import simulation
-from PIL import Image
-from copy import deepcopy
 
 def clamp(x, smallest, largest): return max(smallest, min(x, largest))
 
@@ -11,13 +9,13 @@ class DiffusionAutomaton(simulation.Automaton):
     
     def __init__(self):
         self.probabilities = [
-            [0.05,  0.01, 0.05 ],
-            [0.01,  0.0,  0.01 ],
-            [0.01, 0.01,  0.01]]
+            [0.05,  0.1, 0.05 ],
+            [0.01,  0.0,  0.1 ],
+            [0.1, 0.01,  0.01]]
         self.values = [
-            [1,  0,  1],
-            [0,  0,  0 ],
-            [1, 0,  1]]
+            [-1,  0,  -2],
+            [0,  0,  4 ],
+            [1, 0,  -2]]
         self.seeds = set()
         self.p_direct = 0.2
         self.seed_value = 1
@@ -39,7 +37,7 @@ if __name__ == "__main__":
 
     random.seed()
 
-    sim = simulation.Sim(80,80,DiffusionAutomaton())
+    sim = simulation.Sim(500,500,DiffusionAutomaton())
 
     for i in range(args.seeds):
         k,l = random.randint(0,sim.size_x), random.randint(0,sim.size_y)
@@ -49,4 +47,4 @@ if __name__ == "__main__":
     path = ntpath.dirname(
         ntpath.abspath(__file__)
     )
-    sim.export_list(f'{path}/{args.name}',args.steps)
+    sim.export(f'{path}/{args.name}',args.steps)
