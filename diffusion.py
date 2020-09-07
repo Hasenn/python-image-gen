@@ -31,13 +31,19 @@ class DiffusionAutomaton(simulation.Automaton):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("name")
-    parser.add_argument("steps", type=int)
-    parser.add_argument("--seeds", type=int, default=100)
+    parser.add_argument("steps",    type=int)
+    parser.add_argument("--seeds",  type=int, default=100)
+    parser.add_argument("--size-x", type=int, default=120)
+    parser.add_argument("--size-y", type=int, default=120)
     args = parser.parse_args()
 
     random.seed()
 
-    sim = simulation.Sim(500,500,DiffusionAutomaton())
+    sim = simulation.Sim(
+        args.size_x,
+        args.size_y,
+        DiffusionAutomaton()
+        )
 
     for i in range(args.seeds):
         k,l = random.randint(0,sim.size_x), random.randint(0,sim.size_y)

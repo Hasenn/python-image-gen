@@ -39,8 +39,10 @@ class Sim:
                         0, 255
                         )
         return new_grid
+
     def sim_step(self):
         return self.sim_step_serial()
+
     def sim_step_parallel(self):
         _pool.map(self._sim_cell, 
             _pool.map(self._sim_cell,
@@ -48,6 +50,7 @@ class Sim:
             )
         )
         return new_grid
+        
     def _sim_cell(self, i,j):
         return clamp(
                     self.grid[i][j] + self.automaton.cell_step(
