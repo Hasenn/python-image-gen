@@ -18,7 +18,6 @@ class Sim:
         self.size_y = size_y
         self.grid = [[0 for i in range(size_y)] for j in range(size_x)]
         self.automaton : Automaton = automaton
-        self._pool = mp.Pool()
 
     def get_moore_neighbourhood(self, i, j):
         return filter(
@@ -43,14 +42,6 @@ class Sim:
     def sim_step(self):
         return self.sim_step_serial()
 
-    def sim_step_parallel(self):
-        _pool.map(self._sim_cell, 
-            _pool.map(self._sim_cell,
-                [[(i,j) for i in range(self.size_x)] for j in range(self.size_y)]
-            )
-        )
-        return new_grid
-        
     def _sim_cell(self, i,j):
         return clamp(
                     self.grid[i][j] + self.automaton.cell_step(
@@ -89,5 +80,9 @@ class Sim:
     def export_list(self,path,steps):
         images = self.render_list(steps)
         images[0].save(f'{path}.gif', save_all=True, append_images = images[1:], loop = 0)
+    
+
+
+        
 
 
